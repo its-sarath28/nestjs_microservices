@@ -3,20 +3,14 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  MessageBody,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import {
-  Inject,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { ClientProxy, EventPattern } from '@nestjs/microservices';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { JwtService } from '@nestjs/jwt';
 
-import { PATTERN } from '@app/common/constant/pattern';
-import { NewCommentDto } from './dto/socket.dto';
+import { EVENTS } from '@app/common/constant/pattern';
+import { NewCommentDto, NewFollowerDto, NewLikeDto } from './dto/socket.dto';
 import { AuthenticatedSocket } from './type';
 import { GATEWAY_CLIENT } from '@app/common/constant/token';
 
@@ -70,7 +64,29 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.sockets.sockets.forEach((sock) => {
       const socket = sock as AuthenticatedSocket;
       if (socket.user?.id.toString() === authorId.toString()) {
-        socket.emit('newComment', { comment, user });
+        socket.emit(EVENTS.NEW_COMMENT, { comment, user });
+      }
+    });
+  }
+
+  handleNotifyNewLike(data: NewLikeDto) {
+    const { authorId, user } = data;
+
+    this.server.sockets.sockets.forEach((sock) => {
+      const socket = sock as AuthenticatedSocket;
+      if (socket.user?.id === authorId) {
+        socket.emit(EVENTS.NEW_LIKE, { user });
+      }
+    });
+  }
+
+  handleNotifyNewFollower(data: NewFollowerDto) {
+    const { followingId, fullName, imageUrl } = data;
+
+    this.server.sockets.sockets.forEach((sock) => {
+      const socket = sock as AuthenticatedSocket;
+      if (socket.user?.id === followingId) {
+        socket.emit(EVENTS.NEW_FOLLOWER, { fullName, imageUrl });
       }
     });
   }

@@ -29,16 +29,19 @@ export class InteractionService {
     @Inject(BLOG_CLIENT) private readonly blogClient: ClientProxy,
     @Inject(GATEWAY_CLIENT)
     private readonly gatewayClient: ClientProxy,
+
     @InjectModel(Like.name) private likeModel: Model<Like>,
     @InjectModel(Comment.name) private commentModel: Model<Comment>,
     @InjectModel(Follow.name) private followModel: Model<Follow>,
   ) {}
 
   async updateLike(blogId: string, userId: number) {
-    const [blog, existingLike] = await Promise.all([
-      firstValueFrom(this.blogClient.send(PATTERN.BLOG.FIND_BY_ID, blogId)),
-      this.likeModel.findOne({ blogId, userId }),
-    ]);
+    const [blog, existingLike, user]: [Blog | null, Like | null, User | null] =
+      await Promise.all([
+        firstValueFrom(this.blogClient.send(PATTERN.BLOG.FIND_BY_ID, blogId)),
+        this.likeModel.findOne({ blogId, userId }),
+        firstValueFrom(this.blogClient.send(PATTERN.USER.FIND_BY_ID, userId)),
+      ]);
 
     if (!blog) {
       throw new NotFoundException('Blog not found');
@@ -65,6 +68,14 @@ export class InteractionService {
       blogId,
     });
 
+    this.gatewayClient.emit(PATTERN.SOCKET.NOTIFY_NEW_LIKE, {
+      authorId: blog.authorId.toString(),
+      user: {
+        fullName: user?.fullName,
+        imageUrl: user?.imageUrl,
+      },
+    });
+
     return {
       liked: true,
       message: 'Liked successfully',
@@ -72,9 +83,10 @@ export class InteractionService {
   }
 
   async createComment(blogId: string, comment: string, userId: number) {
-    const blog: Blog = await firstValueFrom(
-      this.blogClient.send(PATTERN.BLOG.FIND_BY_ID, blogId),
-    );
+    const [blog, user]: [Blog | null, User | null] = await Promise.all([
+      firstValueFrom(this.blogClient.send(PATTERN.BLOG.FIND_BY_ID, blogId)),
+      firstValueFrom(this.userClient.send(PATTERN.USER.FIND_BY_ID, userId)),
+    ]);
 
     if (!blog) {
       throw new NotFoundException('Blog not found');
@@ -95,8 +107,8 @@ export class InteractionService {
       authorId: blog.authorId.toString(),
       comment,
       user: {
-        fullName: 'Full',
-        imageUrl: '',
+        fullName: user?.fullName,
+        imageUrl: user?.imageUrl,
       },
     });
 
@@ -192,7 +204,18 @@ export class InteractionService {
       return { message: 'Unfollowed successfully', following: false };
     }
 
+    const user: User | null = await firstValueFrom(
+      this.userClient.send(PATTERN.USER.FIND_BY_ID, followerId),
+    );
+
     await this.followModel.create({ followerId, followingId });
+
+    this.gatewayClient.emit(PATTERN.SOCKET.NOTIFY_NEW_FOLLOWER, {
+      followingId: followingId.toString(),
+      fullName: user?.fullName,
+      imageUrl: user?.imageUrl,
+    });
+
     return { message: 'Followed successfully', following: true };
   }
 }

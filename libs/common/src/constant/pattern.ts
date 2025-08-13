@@ -29,5 +29,13 @@ export const PATTERN = {
   },
   SOCKET: {
     NOTIFY_NEW_COMMENT: { cmd: 'new_comment' },
+    NOTIFY_NEW_LIKE: { cmd: 'new_like' },
+    NOTIFY_NEW_FOLLOWER: { cmd: 'new_follower' },
   },
+};
+
+export const EVENTS = {
+  NEW_COMMENT: 'new_comment',
+  NEW_LIKE: 'new_like',
+  NEW_FOLLOWER: 'new_follower',
 };
