@@ -1,0 +1,17 @@
+export enum BLOG_CATEGORY {
+  SCIENCE = 'Science',
+  TECHNOLOGY = 'Technology',
+  HEALTH = 'Health',
+  BUSINESS = 'Business',
+  EDUCATION = 'Education',
+  TRAVEL = 'Travel',
+  FOOD = 'Food',
+  LIFESTYLE = 'Lifestyle',
+  ENTERTAINMENT = 'Entertainment',
+  SPORTS = 'Sports',
+  ENVIRONMENT = 'Environment',
+  POLITICS = 'Politics',
+  HISTORY = 'History',
+  ART = 'Art',
+  OTHER = 'Other',
+}
