@@ -18,7 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/blog-microservice-app/test/jest-e2e.json",
-    "start:all": "concurrently \"nest start api-gateway --watch\" \"nest start auth --watch\" \"nest start user --watch\" \"nest start blog --watch\" \"nest start interaction --watch\" \"nest start notification --watch\""
+    "start:all": "concurrently \"nest start api-gateway --watch\" \"nest start auth --watch\" \"nest start user --watch\" \"nest start blog --watch\" \"nest start interaction --watch\""
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

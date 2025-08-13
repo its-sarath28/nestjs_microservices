@@ -4,6 +4,7 @@ import { SocketGateway } from './socket.gateway';
 import { AuthModule } from '../auth/auth.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { GATEWAY_CLIENT, SOCKET_PORT } from '@app/common/constant/token';
+import { SocketController } from './socket.controller';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { GATEWAY_CLIENT, SOCKET_PORT } from '@app/common/constant/token';
       },
     ]),
   ],
+  controllers: [SocketController],
   providers: [SocketGateway, SocketService],
   exports: [SocketGateway],
 })

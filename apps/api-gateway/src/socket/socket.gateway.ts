@@ -48,7 +48,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       client.user = {
-        id: payload.userId,
+        id: payload.userId.toString(),
         email: payload.email,
       };
 
@@ -64,16 +64,13 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`Client disconnected: ${client.id}`);
   }
 
-  @EventPattern(PATTERN.SOCKET.NOTIFY_NEW_COMMENT)
-  handleNotifyNewComment(@MessageBody() data: NewCommentDto) {
+  handleNotifyNewComment(data: NewCommentDto) {
     const { authorId, comment, user } = data;
-    Logger.log('Reached here', data);
 
     this.server.sockets.sockets.forEach((sock) => {
       const socket = sock as AuthenticatedSocket;
-      if (socket.user?.id === authorId) {
+      if (socket.user?.id.toString() === authorId.toString()) {
         socket.emit('newComment', { comment, user });
-        Logger.log('New comment notified', data);
       }
     });
   }
